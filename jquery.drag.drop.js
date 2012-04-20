@@ -23,7 +23,9 @@
 		'dropClass' 	 : 'file-drop', // Default class for the drop div
 		'dropHoverClass' : 'file-drop-hover', // Class applied to the drop div when dragging over it
 		'defaultText'  	 : 'Drop your files here!', // Default HTML content for the drop div
-		'hoverText'	 : 'Let go to upload!' // HTML content shown when hovering over the drop div
+		'hoverText'	 : 'Let go to upload!', // HTML content shown when hovering over the drop div
+		'dropTarget' : null,
+		'params' : null,
 	};
 	var $this = null;
 	var xhr = new XMLHttpRequest();
@@ -48,10 +50,15 @@
 			return 'draggable' in document.createElement('span') && xhr.upload;
 		},
 		createDropDiv : function() { // Creates the div that files can be dropped on to
-			$dropDiv = $('<div>').addClass(settings.dropClass)
-				.html(settings.defaultText);
+			if (settings.dropTarget){
+				$dropDiv = $(settings.dropTarget);
+				$dropDiv.addClass(settings.dropClass);
+			} else {
+				$dropDiv = $('<div>').addClass(settings.dropClass)
+					.html(settings.defaultText);
 			
-			$this.after($dropDiv);
+				$this.after($dropDiv);
+			}
 		},
 		bindEvents : function() { // Bind plugin events
 			$this.bind('change.dropUpload', methods.fileChange) // Bind event for manual file selection
@@ -65,6 +72,11 @@
 			var files = e.originalEvent.target.files || e.originalEvent.dataTransfer.files;
 			for (var i = 0, f; f = files[i]; i++) {
 				formData.append(f.name, f); // Append each files to the form data
+			}
+			if (settings.params){
+				$.each(settings.params, function(key, value){
+					formData.append(key, value);
+				});
 			}
 			methods.sendFormData();
 			return false;
